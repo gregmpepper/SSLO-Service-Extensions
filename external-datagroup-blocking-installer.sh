@@ -42,12 +42,12 @@ with open(output_filename, "w") as f:
 EOF
 
 
-## Install advanced-blocking-pages iRule
-echo "..Creating the advanced-blocking-pages-rule iRule"
-curl -sk "https://raw.githubusercontent.com/f5devcentral/sslo-service-extensions/refs/heads/main/advanced-blocking-pages/advanced-blocking-pages-rule" -o advanced-blocking-pages-rule.in
-python3 rule-converter.py advanced-blocking-pages-rule.in
-rule=$(cat advanced-blocking-pages-rule.out)
-data="{\"name\":\"advanced-blocking-pages-rule\",\"apiAnonymous\":\"${rule}\"}"
+## Install external-datagroup-blocking iRule
+echo "..Creating the external-datagroup-blocking-rule iRule"
+curl -sk "https://raw.githubusercontent.com/gregmpepper/SSLO-Service-Extensions/refs/heads/main/external-datagroup-blocking" -o external-datagroup-blocking-rule.in
+python3 rule-converter.py external-datagroup-blocking-rule.in
+rule=$(cat external-datagroup-blocking-rule.out)
+data="{\"name\":\"external-datagroup-blocking-rule\",\"apiAnonymous\":\"${rule}\"}"
 curl -sk \
 -u ${BIGUSER} \
 -H "Content-Type: application/json" \
@@ -55,43 +55,12 @@ curl -sk \
 https://localhost/mgmt/tm/ltm/rule -o /dev/null
 
 
-## Install sslo-tls-verify iRule
-echo "..Creating the sslo-tls-verify-rule iRule"
-curl -sk "https://raw.githubusercontent.com/f5devcentral/sslo-service-extensions/refs/heads/main/advanced-blocking-pages/sslo-tls-verify-rule" -o sslo-tls-verify-rule.in
-python3 rule-converter.py sslo-tls-verify-rule.in
-rule=$(cat sslo-tls-verify-rule.out)
-data="{\"name\":\"sslo-tls-verify-rule\",\"apiAnonymous\":\"${rule}\"}"
+## Create SSLO External DataGroup Blocking Inspection Service
+echo "..Creating the SSLO external-datagroup-blocking inspection service"
 curl -sk \
 -u ${BIGUSER} \
 -H "Content-Type: application/json" \
--d "${data}" \
-https://localhost/mgmt/tm/ltm/rule -o /dev/null
-
-
-## Create iFile System object (advanced-blocking-pages-html)
-echo "..Creating the iFile system object for the advanced-blocking-pages-html"
-curl -sk \
--u ${BIGUSER} \
--H "Content-Type: application/json" \
--d '{"name": "advanced-blocking-pages-html", "source-path": "https://raw.githubusercontent.com/f5devcentral/sslo-service-extensions/refs/heads/main/advanced-blocking-pages/advanced-blocking-pages-html"}' \
-https://localhost/mgmt/tm/sys/file/ifile/ -o /dev/null
-
-
-# ## Create iFile LTM object (advanced-blocking-pages-html)
-echo "..Creating the iFile LTM object for the advanced-blocking-pages-html"
-curl -sk \
--u ${BIGUSER} \
--H "Content-Type: application/json" \
--d '{"name":"advanced-blocking-pages-html", "file-name": "advanced-blocking-pages-html"}' \
-https://localhost/mgmt/tm/ltm/ifile -o /dev/null
-
-
-## Create SSLO Advanced Blocking Pages Inspection Service
-echo "..Creating the SSLO advanced-blocking-pages inspection service"
-curl -sk \
--u ${BIGUSER} \
--H "Content-Type: application/json" \
--d "$(curl -sk https://raw.githubusercontent.com/f5devcentral/sslo-service-extensions/refs/heads/main/advanced-blocking-pages/advanced-blocking-pages-service)" \
+-d "$(curl -sk https://raw.githubusercontent.com/gregmpepper/SSLO-Service-Extensions/refs/heads/main/external-datagroup-blocking)" \
 https://localhost/mgmt/shared/iapp/blocks -o /dev/null
 
 
@@ -100,18 +69,18 @@ echo "..Sleeping for 15 seconds to allow SSLO inspection service creation to fin
 sleep 15
 
 
-## Modify SSLO Advanced Blocking Pages Isolation Service (remove tenant-restrictions iRule)
-echo "..Modifying the SSLO advanced-blocking-pages service"
+## Modify SSLO External DataGroup Blocking Isolation Service (remove tenant-restrictions iRule)
+echo "..Modifying the SSLO external-datagroup-blocking service"
 curl -sk \
 -u ${BIGUSER} \
 -H "Content-Type: application/json" \
 -X PATCH \
--d '{"rules":["/Common/advanced-blocking-pages-rule"]}' \
-https://localhost/mgmt/tm/ltm/virtual/ssloS_F5_Advanced-Blocking-Pages.app~ssloS_F5_Advanced-Blocking-Pages-t-4 -o /dev/null
+-d '{"rules":["/Common/external-datagroup-blocking-rule"]}' \
+https://localhost/mgmt/tm/ltm/virtual/ssloS_F5_External-DataGroup-Blocking.app~ssloS_F5_External-DataGroup-Blocking-t-4 -o /dev/null
 
 
 echo "..Cleaning up temporary files"
-rm -f rule-converter.py advanced-blocking-pages-rule.in advanced-blocking-pages-rule.out sslo-tls-verify-rule.in sslo-tls-verify-rule.out
+rm -f rule-converter.py external-datagroup-blocking-rule.in external-datagroup-blocking-rule.out
 
 
 echo "..Done"
