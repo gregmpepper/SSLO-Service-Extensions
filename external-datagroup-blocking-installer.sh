@@ -1,7 +1,7 @@
 #!/bin/bash
-# Author: kevin-at-f5-dot-com
-# Version: 20251010-1
-# Installs the Advanced Blocking Pages Service Extension
+# Author: Greg Pepper
+# Version: 20260910-1
+# Installs the External DataGroup Blocking Advanced Blocking Pages Service Extension
 
 if [[ -z "${BIGUSER}" ]]
 then
