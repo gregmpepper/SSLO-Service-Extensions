@@ -3,17 +3,13 @@
 ## Date: 2026 Sept 10
 ## Author: Greg Pepper, F5 Networks
 
-when RULE_INIT {
-    ## ===========================================
-    ## User-Defined Setting :: GLOBAL BLOCK: Use this Boolean to indicate blocking strategy:
-    ##  0 (off): The iRule logic below determines the blocking behavior, where the blocking service can be placed in all service chains.
-    ##  1  (on): The SSLO policy inserts a static blocking action, where the blocking service is applied to a blocking service chain.
-    ##
-    ## User-Defined Setting :: GLOBAL BLOCK MESSAGE: Send this string to the iFile for any additional messaging on the page.
-    ## ===========================================
-    set static::GLOBAL_BLOCK 0
-    set static::GLOBAL_BLOCK_MESSAGE "This request has been blocked. If you believe you have reached this page in error, please contact support."
-    
+proc GEN_BLOCK_PAGE { msg } {
+  # Option 1: Serve a static HTML page directly from F5 [3]
+        HTTP::respond 200 content \
+          "<html><head><title>Access Denied - $msg</title></head><body><h1>Access Denied</h1><p>This content has been blocked by the Ministry of Information Technology.</p><p>Reference ID: MOIT-BLOCK-12345</p></body></html>" \
+          "Content-Type" "text/html"
+        # Option 2: Redirect to a specific blocking page for this agency [3, 4]
+        # HTTP::redirect "http://blockpage.example.com/moit_blocked.html"
 }
 
 when HTTP_REQUEST {
@@ -27,40 +23,8 @@ when HTTP_REQUEST {
   # If a match is found (i.e., $matched_agency is not empty)
   if { $matched_agency ne "" } {
     log local0. "Blocked URL: $full_url requested by agency: $matched_agency"
-
-    # Serve custom block page or redirect based on the matched agency
-    switch $matched_agency {
-      "Ministry of Information Technology" {
-        # Option 1: Serve a static HTML page directly from F5 [3]
-        HTTP::respond 200 content \
-          "<html><head><title>Access Denied - Ministry of InfoTech</title></head><body><h1>Access Denied</h1><p>This content has been blocked by the Ministry of Information Technology.</p><p>Reference ID: MOIT-BLOCK-12345</p></body></html>" \
-          "Content-Type" "text/html"
-        # Option 2: Redirect to a specific blocking page for this agency [3, 4]
-        # HTTP::redirect "http://blockpage.example.com/moit_blocked.html"
-      }
-      "Department of Telecommunications, Region A" {
-        HTTP::respond 200 content \
-          "<html><head><title>Access Restricted - DoT Region A</title></head><body><h1>Access Restricted</h1><p>This content is restricted by the Department of Telecommunications, Region A.</p><p>For inquiries, contact: dot.regionA@example.gov</p></body></html>" \
-          "Content-Type" "text/html"
-      }
-      "Cyber Security Agency" {
-        HTTP::respond 200 content \
-          "<html><head><title>Security Block - Cyber Security Agency</title></head><body><h1>Security Alert</h1><p>Access to this page has been blocked by the Cyber Security Agency for security reasons.</p><p>Incident ID: CSA-SEC-9876</p></body></html>" \
-          "Content-Type" "text/html"
-      }
-      "National Intelligence Bureau" {
-        HTTP::respond 200 content \
-          "<html><head><title>Restricted Content - NIB</title></head><body><h1>Restricted Content</h1><p>This content has been restricted by order of the National Intelligence Bureau.</p></body></html>" \
-          "Content-Type" "text/html"
-      }
-      default {
-        # Fallback for agencies not explicitly handled, or a generic block
-        HTTP::respond 200 content \
-          "<html><head><title>Content Blocked</title></head><body><h1>Content Blocked</h1><p>Access to this content has been restricted by government order.</p></body></html>" \
-          "Content-Type" "text/html"
-      }
-    }
-    # Important: Stop further iRule processing and prevent the request from going to the backend
-    return
+    call GEN_BLOCK_PAGE ${matched_agency}
+    event disable all
   }
+
 }
