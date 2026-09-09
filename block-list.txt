@@ -1,0 +1,3 @@
+"x.com" := "Ministry of Information Technology",
+"whitehouse.gov" := "Department of State",
+"amazon.com" := "Cyber Security Agency",
