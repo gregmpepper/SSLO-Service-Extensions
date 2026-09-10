@@ -33,7 +33,7 @@ https://localhost/mgmt/tm/ltm/rule
 
 
 ## Upload external data group source file
-echo "..Uploading the external data group source file"
+echo -e "\n\n\..Uploading the external data group source file"
 if ! curl -skf \
 "https://raw.githubusercontent.com/gregmpepper/SSLO-Service-Extensions/refs/heads/main/block-list.txt" \
 -o block-list.txt
@@ -63,7 +63,7 @@ curl -sk \
 
 
 ## Create external data group
-echo "..Creating the dg_blocklist_by_agency external data group"
+echo -e "\n\n..Creating the dg_blocklist_by_agency external data group"
 curl -sk \
 -u "${BIGUSER}" \
 -H "Content-Type: application/json" \
@@ -71,7 +71,7 @@ curl -sk \
 https://localhost/mgmt/tm/ltm/data-group/external 
 
 ## Create SSLO External DataGroup Blocking Inspection Service
-echo "..Creating the SSLO external-datagroup-blocking inspection service"
+echo -e "\n\n..Creating the SSLO external-datagroup-blocking inspection service"
 curl -sk \
 -u ${BIGUSER} \
 -H "Content-Type: application/json" \
@@ -85,7 +85,7 @@ sleep 15
 
 
 ## Modify SSLO External DataGroup Blocking Isolation Service (remove tenant-restrictions iRule)
-echo "..Modifying the SSLO external-datagroup-blocking service"
+echo -e "\n\n..Modifying the SSLO external-datagroup-blocking service"
 curl -sk \
 -u ${BIGUSER} \
 -H "Content-Type: application/json" \
@@ -94,8 +94,8 @@ curl -sk \
 https://localhost/mgmt/tm/ltm/virtual/ssloS_F5_External-DataGroup-Blocking-Pages.app~ssloS_F5_External-DataGroup-Blocking-Pages-t-4 -o /dev/null
 
 
-echo "..Cleaning up temporary files"
+echo -e "\n\n..Cleaning up temporary files"
 rm -f external-datagroup-blocking-rule.in block-list.txt
 
 
-echo "..Done"
+echo -e "\n\n..Done"
