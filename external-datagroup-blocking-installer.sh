@@ -107,12 +107,21 @@ curl -sk \
 "https://localhost/mgmt/shared/file-transfer/uploads/block-list.txt" -o /dev/null
 
 
+## Create sys file data-group object
+echo "..Registering the external data group source file"
+json_curl -sk \
+-u "${BIGUSER}" \
+-H "Content-Type: application/json" \
+-d '{"name":"block-list.txt","sourcePath":"file:/var/config/rest/downloads/block-list.txt"}' \
+https://localhost/mgmt/tm/sys/file/data-group
+
+
 ## Create external data group
 echo "..Creating the dg_blocklist_by_agency external data group"
 json_curl -sk \
 -u "${BIGUSER}" \
 -H "Content-Type: application/json" \
--d '{"name":"dg_blocklist_by_agency","externalFileName":"/shared/file-transfer/uploads/block-list.txt"}' \
+-d '{"name":"dg_blocklist_by_agency","externalFileName":"block-list.txt"}' \
 https://localhost/mgmt/tm/ltm/data-group/external
 
 
