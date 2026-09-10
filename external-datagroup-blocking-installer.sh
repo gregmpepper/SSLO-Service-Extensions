@@ -12,6 +12,20 @@ then
     exit 1
 fi
 
+json_curl() {
+    local response
+
+    if ! response=$(curl "$@")
+    then
+        return 1
+    fi
+
+    if [[ "${DEBUG:-0}" == "1" ]]
+    then
+        printf '%s\n' "${response}"
+    fi
+}
+
 ## Create temporary Python converter
 cat > "rule-converter.py" << 'EOF'
 import sys
@@ -56,11 +70,11 @@ print(json.dumps({
 }))
 EOF
 )
-curl -sk \
+json_curl -sk \
 -u ${BIGUSER} \
 -H "Content-Type: application/json" \
 -d "${data}" \
-https://localhost/mgmt/tm/ltm/rule -o /dev/null
+https://localhost/mgmt/tm/ltm/rule
 
 
 ## Upload external data group source file
@@ -95,20 +109,20 @@ curl -sk \
 
 ## Create external data group
 echo "..Creating the dg_blocklist_by_agency external data group"
-curl -sk \
+json_curl -sk \
 -u "${BIGUSER}" \
 -H "Content-Type: application/json" \
 -d '{"name":"dg_blocklist_by_agency","externalFileName":"/shared/file-transfer/uploads/block-list.txt"}' \
-https://localhost/mgmt/tm/ltm/data-group/external -o /dev/null
+https://localhost/mgmt/tm/ltm/data-group/external
 
 
 ## Create SSLO External DataGroup Blocking Inspection Service
 echo "..Creating the SSLO external-datagroup-blocking inspection service"
-curl -sk \
+json_curl -sk \
 -u ${BIGUSER} \
 -H "Content-Type: application/json" \
 -d "$(curl -sk https://raw.githubusercontent.com/gregmpepper/SSLO-Service-Extensions/refs/heads/main/external-datagroup-blocking)" \
-https://localhost/mgmt/shared/iapp/blocks -o /dev/null
+https://localhost/mgmt/shared/iapp/blocks
 
 
 ## Sleep for 15 seconds to allow SSLO inspection service creation to finish
@@ -118,12 +132,12 @@ sleep 15
 
 ## Modify SSLO External DataGroup Blocking Isolation Service (remove tenant-restrictions iRule)
 echo "..Modifying the SSLO external-datagroup-blocking service"
-curl -sk \
+json_curl -sk \
 -u ${BIGUSER} \
 -H "Content-Type: application/json" \
 -X PATCH \
 -d '{"rules":["/Common/external-datagroup-blocking-rule"]}' \
-https://localhost/mgmt/tm/ltm/virtual/ssloS_F5_External-DataGroup-Blocking.app~ssloS_F5_External-DataGroup-Blocking-t-4 -o /dev/null
+https://localhost/mgmt/tm/ltm/virtual/ssloS_F5_External-DataGroup-Blocking.app~ssloS_F5_External-DataGroup-Blocking-t-4
 
 
 echo "..Cleaning up temporary files"
