@@ -29,7 +29,7 @@ curl -sk \
 -u ${BIGUSER} \
 -H "Content-Type: application/json" \
 -d "${data}" \
-https://localhost/mgmt/tm/ltm/rule -o /dev/null
+https://localhost/mgmt/tm/ltm/rule
 
 
 ## Upload external data group source file
@@ -59,7 +59,7 @@ curl -sk \
 -H "Content-Type: application/octet-stream" \
 -H "Content-Range: 0-${last_byte}/${file_size}" \
 --data-binary @block-list.txt \
-"https://localhost/mgmt/shared/file-transfer/uploads/block-list.txt" -o /dev/null
+"https://localhost/mgmt/shared/file-transfer/uploads/block-list.txt" 
 
 
 ## Create external data group
@@ -68,8 +68,7 @@ curl -sk \
 -u "${BIGUSER}" \
 -H "Content-Type: application/json" \
 -d '{"name":"dg_blocklist_by_agency","externalFileName":"/var/config/rest/downloads/block-list.txt"}' \
-https://localhost/mgmt/tm/ltm/data-group/external -o /dev/null
-
+https://localhost/mgmt/tm/ltm/data-group/external 
 
 ## Create SSLO External DataGroup Blocking Inspection Service
 echo "..Creating the SSLO external-datagroup-blocking inspection service"
@@ -77,7 +76,7 @@ curl -sk \
 -u ${BIGUSER} \
 -H "Content-Type: application/json" \
 -d "$(curl -sk https://raw.githubusercontent.com/gregmpepper/SSLO-Service-Extensions/refs/heads/main/external-datagroup-blocking)" \
-https://localhost/mgmt/shared/iapp/blocks -o /dev/null
+https://localhost/mgmt/shared/iapp/blocks 
 
 
 ## Sleep for 15 seconds to allow SSLO inspection service creation to finish
