@@ -34,7 +34,7 @@
               "iRuleList": [
                 {
                   "name": "/Common/external-datagroup-blocking-rule",
-                  "value": "/Common/external-datagrop-blocking-rule"
+                  "value": "/Common/external-datagroup-blocking-rule"
                 }
               ]
             },

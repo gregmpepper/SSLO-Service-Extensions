@@ -12,41 +12,19 @@ then
     exit 1
 fi
 
-## Create temporary Python converter
-cat > "rule-converter.py" << 'EOF'
-import sys
-
-filename = sys.argv[1]
-
-with open(filename, "r") as file:
-    lines = file.readlines()
-
-escape_chars = {
-    '\\': '\\\\',
-    '"': '\\"',
-    '\n': '\\n',
-    '\[': '\\[',
-    '\]': '\\]',
-    '\.': '\\.',
-    '\d': '\\d',
-}
-
-one_line = "".join(lines)
-for old, new in escape_chars.items():
-    one_line = one_line.replace(old, new)
-
-output_filename = filename.split(".")[0] + ".out"
-with open(output_filename, "w") as f:
-    f.write(one_line)
-EOF
-
-
 ## Install external-datagroup-blocking iRule
 echo "..Creating the external-datagroup-blocking-rule iRule"
 curl -sk "https://raw.githubusercontent.com/gregmpepper/SSLO-Service-Extensions/refs/heads/main/external-datagroup-blocking" -o external-datagroup-blocking-rule.in
-python3 rule-converter.py external-datagroup-blocking-rule.in
-rule=$(cat external-datagroup-blocking-rule.out)
-data="{\"name\":\"external-datagroup-blocking-rule\",\"apiAnonymous\":\"${rule}\"}"
+data=$(python3 - <<'EOF'
+import json
+from pathlib import Path
+
+print(json.dumps({
+    "name": "external-datagroup-blocking-rule",
+    "apiAnonymous": Path("external-datagroup-blocking-rule.in").read_text(),
+}))
+EOF
+)
 curl -sk \
 -u ${BIGUSER} \
 -H "Content-Type: application/json" \
@@ -89,7 +67,7 @@ echo "..Creating the dg_blocklist_by_agency external data group"
 curl -sk \
 -u "${BIGUSER}" \
 -H "Content-Type: application/json" \
--d '{"name":"dg_blocklist_by_agency","type":"string","externalFileName":"/shared/file-transfer/uploads/block-list.txt"}' \
+-d '{"name":"dg_blocklist_by_agency","externalFileName":"/var/config/rest/downloads/block-list.txt"}' \
 https://localhost/mgmt/tm/ltm/data-group/external -o /dev/null
 
 
@@ -114,11 +92,11 @@ curl -sk \
 -H "Content-Type: application/json" \
 -X PATCH \
 -d '{"rules":["/Common/external-datagroup-blocking-rule"]}' \
-https://localhost/mgmt/tm/ltm/virtual/ssloS_F5_External-DataGroup-Blocking.app~ssloS_F5_External-DataGroup-Blocking-t-4 -o /dev/null
+https://localhost/mgmt/tm/ltm/virtual/ssloS_F5_External-DataGroup-Blocking-Pages.app~ssloS_F5_External-DataGroup-Blocking-Pages-t-4 -o /dev/null
 
 
 echo "..Cleaning up temporary files"
-rm -f rule-converter.py external-datagroup-blocking-rule.in external-datagroup-blocking-rule.out
+rm -f external-datagroup-blocking-rule.in block-list.txt
 
 
 echo "..Done"
