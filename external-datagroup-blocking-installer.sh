@@ -77,42 +77,12 @@ json_curl -sk \
 https://localhost/mgmt/tm/ltm/rule
 
 
-## Upload external data group source file
-echo "..Uploading the external data group source file"
-if ! curl -skf \
-"https://raw.githubusercontent.com/gregmpepper/SSLO-Service-Extensions/refs/heads/main/block-list.txt" \
--o block-list.txt
-then
-    echo "Unable to download block-list.txt. Exiting."
-    exit 1
-fi
-if [[ ! -f "block-list.txt" ]]
-then
-    echo "The external data group source file block-list.txt was not found. Exiting."
-    exit 1
-fi
-
-file_size=$(wc -c < block-list.txt | tr -d ' ')
-if [[ "${file_size}" -eq 0 ]]
-then
-    echo "The external data group source file block-list.txt is empty. Exiting."
-    exit 1
-fi
-last_byte=$((file_size - 1))
-curl -sk \
--u "${BIGUSER}" \
--H "Content-Type: application/octet-stream" \
--H "Content-Range: 0-${last_byte}/${file_size}" \
---data-binary @block-list.txt \
-"https://localhost/mgmt/shared/file-transfer/uploads/block-list.txt" -o /dev/null
-
-
 ## Create sys file data-group object
 echo "..Registering the external data group source file"
 json_curl -sk \
 -u "${BIGUSER}" \
 -H "Content-Type: application/json" \
--d '{"name":"block-list.txt","sourcePath":"file:/var/config/rest/downloads/block-list.txt"}' \
+-d '{"name":"block-list.txt","sourcePath":"https://raw.githubusercontent.com/gregmpepper/SSLO-Service-Extensions/refs/heads/main/block-list.txt"}' \
 https://localhost/mgmt/tm/sys/file/data-group
 
 
