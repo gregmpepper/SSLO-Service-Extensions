@@ -82,17 +82,9 @@ echo "..Registering the external data group source file"
 json_curl -sk \
 -u "${BIGUSER}" \
 -H "Content-Type: application/json" \
--d '{"name":"block-list.txt","sourcePath":"https://raw.githubusercontent.com/gregmpepper/SSLO-Service-Extensions/refs/heads/main/block-list.txt"}' \
+-d '{"name":"block-list.txt","separator":":=","type":"string","sourcePath":"https://raw.githubusercontent.com/gregmpepper/SSLO-Service-Extensions/refs/heads/main/block-list.txt"}' \
 https://localhost/mgmt/tm/sys/file/data-group
 
-
-## Create external data group
-echo "..Creating the dg_blocklist_by_agency external data group"
-json_curl -sk \
--u "${BIGUSER}" \
--H "Content-Type: application/json" \
--d '{"name":"dg_blocklist_by_agency","externalFileName":"block-list.txt"}' \
-https://localhost/mgmt/tm/ltm/data-group/external
 
 
 ## Create SSLO External DataGroup Blocking Inspection Service
