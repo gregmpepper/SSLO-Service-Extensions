@@ -12,39 +12,6 @@ then
     exit 1
 fi
 
-
-## Upload external data group source file
-echo "..Uploading the external data group source file"
-if [[ ! -f "block-list.txt" ]]
-then
-    echo "The external data group source file block-list.txt was not found. Exiting."
-    exit 1
-fi
-
-file_size=$(wc -c < block-list.txt | tr -d ' ')
-if [[ "${file_size}" -eq 0 ]]
-then
-    echo "The external data group source file block-list.txt is empty. Exiting."
-    exit 1
-fi
-last_byte=$((file_size - 1))
-curl -sk \
--u "${BIGUSER}" \
--H "Content-Type: application/octet-stream" \
--H "Content-Range: 0-${last_byte}/${file_size}" \
---data-binary @block-list.txt \
-"https://localhost/mgmt/shared/file-transfer/uploads/block-list.txt" -o /dev/null
-
-
-## Create external data group
-echo "..Creating the dg_blocklist_by_agency external data group"
-curl -sk \
--u "${BIGUSER}" \
--H "Content-Type: application/json" \
--d '{"name":"dg_blocklist_by_agency","type":"string","externalFileName":"/shared/file-transfer/uploads/block-list.txt"}' \
-https://localhost/mgmt/tm/ltm/data-group/external -o /dev/null
-
-
 ## Create temporary Python converter
 cat > "rule-converter.py" << 'EOF'
 import sys
@@ -85,6 +52,45 @@ curl -sk \
 -H "Content-Type: application/json" \
 -d "${data}" \
 https://localhost/mgmt/tm/ltm/rule -o /dev/null
+
+
+## Upload external data group source file
+echo "..Uploading the external data group source file"
+if ! curl -skf \
+"https://raw.githubusercontent.com/gregmpepper/SSLO-Service-Extensions/refs/heads/main/block-list.txt" \
+-o block-list.txt
+then
+    echo "Unable to download block-list.txt. Exiting."
+    exit 1
+fi
+if [[ ! -f "block-list.txt" ]]
+then
+    echo "The external data group source file block-list.txt was not found. Exiting."
+    exit 1
+fi
+
+file_size=$(wc -c < block-list.txt | tr -d ' ')
+if [[ "${file_size}" -eq 0 ]]
+then
+    echo "The external data group source file block-list.txt is empty. Exiting."
+    exit 1
+fi
+last_byte=$((file_size - 1))
+curl -sk \
+-u "${BIGUSER}" \
+-H "Content-Type: application/octet-stream" \
+-H "Content-Range: 0-${last_byte}/${file_size}" \
+--data-binary @block-list.txt \
+"https://localhost/mgmt/shared/file-transfer/uploads/block-list.txt" -o /dev/null
+
+
+## Create external data group
+echo "..Creating the dg_blocklist_by_agency external data group"
+curl -sk \
+-u "${BIGUSER}" \
+-H "Content-Type: application/json" \
+-d '{"name":"dg_blocklist_by_agency","type":"string","externalFileName":"/shared/file-transfer/uploads/block-list.txt"}' \
+https://localhost/mgmt/tm/ltm/data-group/external -o /dev/null
 
 
 ## Create SSLO External DataGroup Blocking Inspection Service
