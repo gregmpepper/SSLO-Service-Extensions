@@ -1,5 +1,5 @@
 {
-    "name": "sslo_ob_SERVICE_CREATE_ssloS_F5_External-DataGroup-Blocking-Pages",
+    "name": "sslo_ob_SERVICE_CREATE_ssloS_F5_External-DataGroup-Blocking",
     "inputProperties": [
       {
         "id": "f5-ssl-orchestrator-operation-context",
@@ -7,7 +7,7 @@
         "value": {
           "operationType": "CREATE",
           "deploymentType": "SERVICE",
-          "deploymentName": "ssloS_F5_External-DataGroup-Blocking-Pages",
+          "deploymentName": "ssloS_F5_External-DataGroup-Blocking",
           "deploymentReference": "",
           "partition": "Common",
           "strictness": true
@@ -18,10 +18,10 @@
         "type": "JSON",
         "value": [
           {
-            "name": "ssloS_F5_External-DataGroup-Blocking-Pages",
+            "name": "ssloS_F5_External-DataGroup-Blocking",
             "strictness": false,
             "customService": {
-              "name": "ssloS_F5_External-DataGroup-Blocking-Pages",
+              "name": "ssloS_F5_External-DataGroup-Blocking",
               "ipFamily": "ipv4",
               "serviceDownAction": "",
               "serviceType": "f5-tenant-restrictions",
@@ -29,7 +29,7 @@
                 "restrictAccessToTenant": "F5ABP",
                 "restrictAccessContext": "F5ABP",
                 "subType": "o365",
-                "name": "ssloS_F5_External-DataGroup-Blocking-Pages"
+                "name": "ssloS_F5_External-DataGroup-Blocking"
               },
               "iRuleList": [
                 {
@@ -39,7 +39,7 @@
               ]
             },
             "vendorInfo": {
-              "name": "F5 SSLO External DataGroup Blocking Pages",
+              "name": "F5 SSLO External DataGroup Blocking",
               "product": "",
               "model": "",
               "version": ""
