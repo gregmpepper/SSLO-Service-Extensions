@@ -54,22 +54,12 @@ with open(output_filename, "w") as f:
     f.write(one_line)
 EOF
 
-
 ## Install external-datagroup-blocking iRule
 echo "..Creating the external-datagroup-blocking-rule iRule"
 curl -sk "https://raw.githubusercontent.com/gregmpepper/SSLO-Service-Extensions/refs/heads/main/external-datagroup-blocking-rule" -o external-datagroup-blocking-rule.in
 python3 rule-converter.py external-datagroup-blocking-rule.in
 rule=$(cat external-datagroup-blocking-rule.out)
-data=$(RULE="${rule}" python3 - <<'EOF'
-import json
-import os
-
-print(json.dumps({
-    "name": "external-datagroup-blocking-rule",
-    "apiAnonymous": os.environ["RULE"],
-}))
-EOF
-)
+data="{\"name\":\"external-datagroup-blocking-rule\",\"apiAnonymous\":\"${rule}\"}"
 json_curl -sk \
 -u ${BIGUSER} \
 -H "Content-Type: application/json" \
