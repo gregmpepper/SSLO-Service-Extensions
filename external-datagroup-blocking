@@ -26,8 +26,8 @@
               "serviceDownAction": "",
               "serviceType": "f5-tenant-restrictions",
               "serviceSpecific": {
-                "restrictAccessToTenant": "F5ABP",
-                "restrictAccessContext": "F5ABP",
+                "restrictAccessToTenant": "F5EDB",
+                "restrictAccessContext": "F5EDB",
                 "subType": "o365",
                 "name": "ssloS_F5_External-DataGroup-Blocking"
               },
